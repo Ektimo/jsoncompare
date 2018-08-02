@@ -1,7 +1,7 @@
-import httplib2
+# import httplib2
 import json
 import sys
-import types
+# import types
 
 TYPE = 'TYPE'
 PATH = 'PATH'
@@ -31,7 +31,8 @@ class Diff(object):
           new_path = "%s.%s" % (path, key)
 
         if isinstance(second, dict):
-          if second.has_key(key):
+          # if second.has_key(key):
+          if key in second:
             sec = second[key]
           else:
             #  there are key in the first, that is not presented in the second
@@ -76,20 +77,21 @@ class Diff(object):
       self.seen.append(diff_message)
       self.difference.append((type_, diff_message))
 
-def getContentFromUri(uri):
-  h = httplib2.Http()
-  resp, content = h.request(uri, "GET")
-  return content
+# def getContentFromUri(uri):
+#   h = httplib2.Http()
+#   resp, content = h.request(uri, "GET")
+#   return content
 
 def getContentFromFile(filePath):
   return open(filePath, 'r').read()
 
 def getContent(location):
   content = None
-  if type(location) is types.DictType:
+  # if type(location) is types.DictType:
+  if isinstance(location, dict) | isinstance(location, list):
     return location
-  if location.startswith("http"):
-    content = getContentFromUri(location)
+  # if location.startswith("http"):
+  #   content = getContentFromUri(location)
   else:
     content = getContentFromFile(location)
   if content is None:
@@ -111,13 +113,13 @@ def compare(location1, location2):
     diffs.append({'type': 'ADDED', 'message': message})
   return diffs
 
-if __name__ == '__main__':
-  if len(sys.argv) != 3:
-    sys.exit('Error')
-  location1 = sys.argv[1]
-  location2 = sys.argv[2]
-  diffs = compare(location1, location2)
-  if len(diffs) > 0:
-    print '\r\nFound differences comparing ' + location1 + ' and ' + location2
-  for diff in diffs:
-    print diff['type'] + ': ' + diff['message']
+# if __name__ == '__main__':
+#   if len(sys.argv) != 3:
+#     sys.exit('Error')
+#   location1 = sys.argv[1]
+#   location2 = sys.argv[2]
+#   diffs = compare(location1, location2)
+#   if len(diffs) > 0:
+#     print '\r\nFound differences comparing ' + location1 + ' and ' + location2
+#   for diff in diffs:
+#     print diff['type'] + ': ' + diff['message']
