@@ -60,7 +60,7 @@ class Diff(object):
             sec = second[index]
           except (IndexError, KeyError):
             # goes to difference
-            self.save_diff('%s - %s' % (new_path, type(item).__name__), TYPE)
+            self.save_diff('%s | %s' % (new_path, type(item).__name__), TYPE)
 
         # recursive call
         self.check(first[index], sec, path=new_path, with_values=with_values)
@@ -69,7 +69,7 @@ class Diff(object):
     else:
       if with_values and second != None:
         if first != second:
-          self.save_diff('%s - %s | %s' % (path, first, second), VALUE)
+          self.save_diff('%s | %s | %s' % (path, first, second), VALUE)
       return
 
   def save_diff(self, diff_message, type_):
