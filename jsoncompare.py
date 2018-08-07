@@ -12,14 +12,15 @@ VALUE = 'VALUE'
 class Diff(object):
   def __init__(self, first, second, with_values=False):
     self.difference = []
-    self.seen = []
+    # self.seen = []
     not_with_values = not with_values
     self.check(first, second, with_values=with_values)
 
   def check(self, first, second, path='', with_values=False):
     if with_values and second != None:
       if not isinstance(first, type(second)):
-        message = '%s - %s, %s' % (path, type(first).__name__, type(second).__name__)
+        # message = '%s | %s | %s' % (path, type(first).__name__, type(second).__name__)
+        message = {'path': path, 'old': type(first).__name__, 'new': type(second).__name__}
         self.save_diff(message, TYPE)
 
     if isinstance(first, dict):
@@ -36,7 +37,9 @@ class Diff(object):
             sec = second[key]
           else:
             #  there are key in the first, that is not presented in the second
-            self.save_diff(new_path, PATH)
+            # self.save_diff(new_path, PATH)
+            message = {'path': new_path, 'old': None, 'new': None}
+            self.save_diff(message, PATH)
 
             # prevent further values checking.
             sec = None
@@ -46,7 +49,9 @@ class Diff(object):
             self.check(first[key], sec, path=new_path, with_values=with_values)
         else:
           # second is not dict. every key from first goes to the difference
-          self.save_diff(new_path, PATH)
+          # self.save_diff(new_path, PATH)
+          message = {'path': new_path, 'old': None, 'new': None}
+          self.save_diff(message, PATH)
           self.check(first[key], second, path=new_path, with_values=with_values)
 
     # if object is list, loop over it and check.
@@ -60,7 +65,9 @@ class Diff(object):
             sec = second[index]
           except (IndexError, KeyError):
             # goes to difference
-            self.save_diff('%s | %s' % (new_path, type(item).__name__), TYPE)
+            # self.save_diff('%s | %s' % (new_path, type(item).__name__), TYPE)
+            message = {'path': new_path, 'old': type(item).__name__, 'new': None}
+            self.save_diff(message, TYPE)
 
         # recursive call
         self.check(first[index], sec, path=new_path, with_values=with_values)
@@ -69,12 +76,13 @@ class Diff(object):
     else:
       if with_values and second != None:
         if first != second:
-          self.save_diff('%s | %s | %s' % (path, first, second), VALUE)
+          message = {'path': path, 'old': first, 'new': second}
+          self.save_diff(message, VALUE)
       return
 
   def save_diff(self, diff_message, type_):
     if diff_message not in self.difference:
-      self.seen.append(diff_message)
+      # self.seen.append(diff_message)
       self.difference.append((type_, diff_message))
 
 # def getContentFromUri(uri):
