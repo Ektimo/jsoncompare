@@ -10,13 +10,13 @@ VALUE = 'VALUE'
 # Borrowed from http://djangosnippets.org/snippets/2247/
 # with some modifications.
 class Diff(object):
-  def __init__(self, first, second, with_values=False):
+  def __init__(self, first, second, with_values=False, caseSensitive=True):
     self.difference = []
     # self.seen = []
     not_with_values = not with_values
-    self.check(first, second, with_values=with_values)
+    self.check(first, second, with_values=with_values, caseSensitive=caseSensitive)
 
-  def check(self, first, second, path='', with_values=False):
+  def check(self, first, second, path='', with_values=False, caseSensitive=True):
     if with_values and second != None:
       if not isinstance(first, type(second)):
         # message = '%s | %s | %s' % (path, type(first).__name__, type(second).__name__)
@@ -46,13 +46,13 @@ class Diff(object):
 
           # recursive call
           if sec != None:
-            self.check(first[key], sec, path=new_path, with_values=with_values)
+            self.check(first[key], sec, path=new_path, with_values=with_values, caseSensitive=caseSensitive)
         else:
           # second is not dict. every key from first goes to the difference
           # self.save_diff(new_path, PATH)
           message = {'path': new_path, 'old': None, 'new': None}
           self.save_diff(message, PATH)
-          self.check(first[key], second, path=new_path, with_values=with_values)
+          self.check(first[key], second, path=new_path, with_values=with_values, caseSensitive=caseSensitive)
 
     # if object is list, loop over it and check.
     elif isinstance(first, list):
@@ -70,12 +70,23 @@ class Diff(object):
             self.save_diff(message, TYPE)
 
         # recursive call
-        self.check(first[index], sec, path=new_path, with_values=with_values)
+        self.check(first[index], sec, path=new_path, with_values=with_values, caseSensitive=caseSensitive)
 
     # not list, not dict. check for equality (only if with_values is True) and return.
     else:
       if with_values and second != None:
-        if first != second:
+        if (not caseSensitive):
+          try:
+            firstUpper = first.upper()
+            secondUpper = second.upper()
+          except:
+            firstUpper = first
+            secondUpper = second
+        else:
+            firstUpper = first
+            secondUpper = second         
+
+        if firstUpper != secondUpper:
           message = {'path': path, 'old': first, 'new': second}
           self.save_diff(message, VALUE)
       return
@@ -106,11 +117,11 @@ def getContent(location):
     raise Error("Could not load content for " + location)
   return json.loads(content)
 
-def compare(location1, location2):
+def compare(location1, location2, caseSensitive=True):
   json1 = getContent(location1)
   json2 = getContent(location2)
-  diff1 = Diff(json1, json2, True).difference
-  diff2 = Diff(json2, json1, False).difference
+  diff1 = Diff(json1, json2, True, caseSensitive).difference
+  diff2 = Diff(json2, json1, False, caseSensitive).difference
   diffs = []
   for type, message in diff1:
     newType = 'CHANGED'
